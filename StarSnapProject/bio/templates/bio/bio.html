@@ -1,0 +1,107 @@
+
+<html>
+<head>
+    <title>Celebrity Bio Finder</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'bio/css/styles.css' %}">
+    <script src="{% static 'bio/js/autocomplete.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // Function to generate and display the summary
+        function displaySummary() {
+            const summary = `Celebrity: {{ bio_data.name }}. Marital Status: {{ bio_data.marital_status }}. Spouse: {{ bio_data.spouse }}. Ex-partners: {{ bio_data.ex }}. Rumored relationships: {{ bio_data.rumors }}.`;
+            document.getElementById('summaryText').innerText = summary;
+            document.getElementById('summarySection').style.display = 'block';
+        }
+
+        // Function to copy the summary text to clipboard
+        function copySummary() {
+            const summaryText = document.getElementById('summaryText').innerText;
+            navigator.clipboard.writeText(summaryText).then(() => {
+                alert("Summary copied to clipboard!");
+            });
+        }
+
+        // Function to download the summary as a PDF
+        function downloadSummaryAsPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const summaryText = document.getElementById('summaryText').innerText;
+            doc.text(summaryText, 10, 10);  // Add the summary text at position (10, 10)
+
+            doc.save("Celebrity_Summary.pdf");  // Download the PDF with a file name
+        }
+    </script>
+</head>
+<body>
+    <h1>Find Celebrity Bio</h1>
+    <form method="POST" onsubmit="return validateForm()">
+        {% csrf_token %}
+        <input type="text" name="celebrity_name" id="celebrity_name" placeholder="Enter Celebrity Name" onkeyup="fetchSuggestions(this.value)" required>
+        <div id="suggestions" class="autocomplete-suggestions"></div>
+        <button type="submit">Get Biography</button>
+    </form>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="loading-spinner"></div>
+
+    {% if bio_data %}
+        <div class="bio-section">
+            <h2>{{ bio_data.name }}</h2>
+            <p><strong>Marital Status:</strong> {{ bio_data.marital_status }}</p>
+            <p><strong>Spouse:</strong> {{ bio_data.spouse }}</p>
+            <p><strong>Ex:</strong> {{ bio_data.ex }}</p>
+            <p><strong>Rumored Relationships:</strong> {{ bio_data.rumors }}</p>
+
+            <!-- Add Chart.js Canvas -->
+            <h3>Relationship Timeline:</h3>
+            <canvas id="relationshipTimeline"></canvas>
+        </div>
+
+        <!-- Social Sharing Buttons -->
+        <div class="social-buttons">
+            <h3>Share This Bio</h3>
+            <a href="https://twitter.com/intent/tweet?text={{ bio_data.name }}'s Biography: {{ request.build_absolute_uri }}" target="_blank">
+                <button class="twitter">Share on Twitter</button>
+            </a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank">
+                <button class="facebook">Share on Facebook</button>
+            </a>
+            <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}&title={{ bio_data.name }}'s Biography" target="_blank">
+                <button class="linkedin">Share on LinkedIn</button>
+            </a>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="summary-section">
+            <button onclick="displaySummary()">Show Summary</button>
+            <div id="summarySection" style="display: none; margin-top: 20px;">
+                <p id="summaryText"></p>
+                <button onclick="copySummary()">Copy to Clipboard</button>
+                <button onclick="downloadSummaryAsPDF()">Download as PDF</button>
+            </div>
+        </div>
+
+        <!-- Display Comments -->
+        <div class="comment-section">
+            <h3>User Comments</h3>
+            {% if comments %}
+                <ul>
+                {% for comment in comments %}
+                    <li class="comment">
+                        <span class="username">{{ comment.user.username }}</span> on <span class="timestamp">{{ comment.created_at }}</span>
+                        <p>{{ comment.comment }}</p>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>No comments yet. Be the first to submit!</p>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if error_message %}
+        <p class="error">{{ error_message }}</p>
+    {% endif %}
+</body>
+</html>
