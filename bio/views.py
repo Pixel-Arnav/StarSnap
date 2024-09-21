@@ -91,7 +91,7 @@ def get_celebrity_bio(request):
             cache.set(celebrity_name, bio_data, timeout=3600)
             return render(request, 'bio.html', {'bio_data': bio_data})
         else:
-            all_celebrities = ["Brad Pitt", "Angelina Jolie", "Tom Cruise", "Johnny Depp"]
+            all_celebrities = ["Brad Pitt", "AngelinaJolie", "Tom Cruise", "Johnny Depp"]
             closest_match = process.extractOne(celebrity_name, all_celebrities)
             error_message = f"Celebrity not found. Did you mean {closest_match[0]}?"
             return render(request, 'bio.html', {'error_message': error_message})
