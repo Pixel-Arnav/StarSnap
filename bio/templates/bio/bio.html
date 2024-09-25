@@ -34,7 +34,7 @@
     </script>
 </head>
 <body>
-    <h1>Find Celebrity Bios</h1>
+    <h1>Find Celebrity Bio</h1>
     <form method="POST" onsubmit="return validateForm()">
         {% csrf_token %}
         <input type="text" name="celebrity_name" id="celebrity_name" placeholder="Enter Celebrity Name" onkeyup="fetchSuggestions(this.value)" required>
