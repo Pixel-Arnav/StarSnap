@@ -1,0 +1,1 @@
+web: gunicorn celebrity_bio_app.wsgi --log-file -
